@@ -1,0 +1,25 @@
+{
+    "name": "google-search-mcp",
+    "version": "1.0.0",
+    "description": "Google Search MCP Server with OpenAI Integration",
+    "main": "googleSearch.ts",
+    "scripts": {
+        "start": "ts-node googleSearch.ts",
+        "build": "tsc",
+        "dev": "nodemon --exec ts-node googleSearch.ts"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.11.2",
+        "@types/cors": "^2.8.18",
+        "@types/express": "^5.0.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "openai": "^4.98.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
+    }
+}

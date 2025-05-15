@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google 검색 MCP 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #4285f4;
+        }
+        .search-container {
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3b78e7;
+        }
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+        }
+        .summary {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google 검색 MCP 테스트</h1>
+    <p>검색어를 입력하고 검색 버튼을 클릭하세요.</p>
+    
+    <div class="search-container">
+        <input type="text" id="query" placeholder="검색어 입력...">
+        <button onclick="search()">검색</button>
+    </div>
+    
+    <div class="loading" id="loading">검색 중... 잠시만 기다려주세요.</div>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function search() {
+            const query = document.getElementById('query').value.trim();
+            if (!query) {
+                alert('검색어를 입력하세요.');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            resultDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('http://localhost:3030/tools/call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'google_web_search',
+                        arguments: {
+                            query: query
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API 오류: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // 결과 표시
+                resultDiv.innerHTML = '';
+                
+                if (data.content && data.content.length > 0) {
+                    // MCP 형식 응답 처리
+                    const summary = data.content[0].text;
+                    const details = data.content[1] ? data.content[1].text : '';
+                    
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'summary';
+                    summaryDiv.textContent = summary;
+                    resultDiv.appendChild(summaryDiv);
+                    
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'details';
+                    detailsDiv.textContent = details;
+                    resultDiv.appendChild(detailsDiv);
+                } else if (typeof data === 'string') {
+                    // 문자열 응답 처리
+                    resultDiv.textContent = data;
+                } else if (data.summary && data.results) {
+                    // OpenAI 형식 응답 처리
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'summary';
+                    summaryDiv.textContent = data.summary;
+                    resultDiv.appendChild(summaryDiv);
+                    
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'details';
+                    detailsDiv.textContent = data.results;
+                    resultDiv.appendChild(detailsDiv);
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                console.error('검색 오류:', error);
+                resultDiv.textContent = `오류: ${error.message}`;
+                resultDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        // Enter 키 이벤트 처리
+        document.getElementById('query').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                search();
+            }
+        });
+    </script>
+</body>
+</html>
