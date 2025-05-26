@@ -1,111 +1,125 @@
-# OpenAI와 Google 커스텀 서치 통합 가이드
+# 🔍 AI 검색 & 📈 주식 분석 플랫폼
 
-이 프로젝트는 Google Custom Search API를 MCP(Model Context Protocol) 서버로 구현하여 OpenAI API와 통합하는 방법을 보여줍니다.
+Google 검색 API와 OpenAI를 활용한 통합 웹 애플리케이션입니다. 실시간 검색과 AI 기반 주식 분석 기능을 제공합니다.
 
-## 설정 방법
+## ✨ 주요 기능
 
-### 1. 필요한 API 키 준비
+- **🔍 AI 검색**: Google 검색 결과를 AI가 요약해서 제공
+- **📈 주식 분석**: 주가 데이터와 뉴스를 종합하여 AI가 분석
+- **📊 인터랙티브 차트**: Chart.js를 활용한 주가 시각화
+- **🎯 시나리오 기반 분석**: 현실적인 주가 변동 패턴 생성
 
-- **Google API 키**: [Google Cloud Console](https://console.cloud.google.com/)에서 발급
-- **Google Custom Search Engine ID**: [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/)에서 생성
-- **OpenAI API 키**: [OpenAI 웹사이트](https://platform.openai.com/)에서 발급
+## 🚀 빠른 시작
 
-### 2. 환경 변수 설정
-
+### 1. 프로젝트 클론
 ```bash
-# Windows
-set GOOGLE_API_KEY=your-google-api-key
-set GOOGLE_CSE_ID=your-custom-search-engine-id
-set OPENAI_API_KEY=your-openai-api-key
-
-# Linux/Mac
-export GOOGLE_API_KEY=your-google-api-key
-export GOOGLE_CSE_ID=your-custom-search-engine-id
-export OPENAI_API_KEY=your-openai-api-key
+git clone [repository-url]
+cd [project-name]
 ```
 
-### 3. 의존성 설치
-
+### 2. 의존성 설치
 ```bash
-# Node.js 의존성 설치
 npm install
-
-# Python 의존성 설치
-pip install -r requirements.txt
 ```
 
-## 시작하기
-
-### 1. MCP 서버 실행
-
+### 3. 환경 변수 설정
 ```bash
-# 의존성 설치
-npm install
+# .env.example을 복사하여 .env 파일 생성
+cp .env.example .env
 
-# 서버 실행
+# .env 파일을 열어 실제 API 키들을 입력하세요
+```
+
+### 4. 서버 실행
+```bash
 npm start
 ```
 
-이 명령은 `googleSearch.ts` 파일을 실행하여 3000번 포트에서 MCP 서버를 시작합니다.
-
-개발 모드로 실행하려면 (코드 변경시 자동 재시작):
-
-```bash
-npm run dev
+### 5. 웹 브라우저에서 접속
+```
+http://localhost:3030
 ```
 
-### 2. OpenAI API와 통합하기
+## 🔑 API 키 발급 방법
 
-서버가 실행 중인 상태에서, 다음 중 하나의 방법으로 통합을 시도할 수 있습니다:
+### Google API 키
+1. [Google Cloud Console](https://console.cloud.google.com/)에 접속
+2. 프로젝트 생성 또는 기존 프로젝트 선택
+3. "API 및 서비스" → "사용자 인증 정보" → "API 키 만들기"
+4. Custom Search API 활성화
+5. 생성된 API 키를 `.env` 파일에 입력
 
-#### a. Python 스크립트 사용
+### Google Custom Search Engine ID
+1. [Programmable Search Engine](https://programmablesearchengine.google.com/)에 접속
+2. "Get started" 클릭하여 검색 엔진 생성
+3. 검색 범위 설정 (전체 웹 또는 특정 사이트)
+4. 생성 후 "Customize" → "Overview"에서 Search engine ID 복사
+5. 복사한 ID를 `.env` 파일에 입력
 
-```bash
-python openai_with_google_search.py
+### OpenAI API 키
+1. [OpenAI Platform](https://platform.openai.com/api-keys)에 접속
+2. "Create new secret key" 클릭
+3. 생성된 API 키를 `.env` 파일에 입력
+
+## 📁 프로젝트 구조
+
+```
+├── public/
+│   └── index.html          # 웹 인터페이스
+├── tools/
+│   ├── googleSearchTool.ts # Google 검색 도구
+│   └── stockAnalysisTool.ts # 주식 분석 도구
+├── googleSearch.ts         # Express 서버 메인 파일
+├── .env.example           # 환경 변수 템플릿
+├── .gitignore            # Git 무시 파일 목록
+├── package.json          # 프로젝트 설정
+└── tsconfig.json         # TypeScript 설정
 ```
 
-이 스크립트는 OpenAI API와 MCP 서버를 연결하여 사용자 질문에 대한 답변을 제공합니다.
+## 🛠️ 기술 스택
 
-#### b. Streamlit 웹 인터페이스 사용
+- **Backend**: Node.js, Express, TypeScript
+- **Frontend**: HTML, CSS, JavaScript, Chart.js
+- **AI**: OpenAI GPT-3.5-turbo
+- **검색**: Google Custom Search JSON API
+- **아키텍처**: MCP (Model Context Protocol)
 
-```bash
-streamlit run prac.py
-```
+## 💡 사용 방법
 
-웹 브라우저에서 Streamlit 인터페이스를 통해 검색 및 대화를 할 수 있습니다.
+### 구글 검색
+1. "구글 검색" 탭 선택
+2. 검색어 입력 후 "검색하기" 클릭
+3. AI가 요약한 검색 결과 확인
 
-## API 엔드포인트
+### 주식 분석
+1. "주식 분석" 탭 선택
+2. 종목명 입력 (예: 삼성전자, 애플, AAPL)
+3. 분석 기간 설정 (시작일 ~ 종료일)
+4. "분석하기" 클릭
+5. 주가 차트, AI 분석, 관련 뉴스 확인
 
-MCP 서버는 다음과 같은 API 엔드포인트를 제공합니다:
+## ⚠️ 사용 제한
 
-- `GET /tools`: 사용 가능한 도구 목록 조회
-- `POST /tools/call`: 도구 실행 (MCP 형식)
-- `POST /openai/tools`: OpenAI Function Calling 형식의 도구 정의 조회
-- `POST /openai/run`: OpenAI Function Calling 형식으로 도구 실행
+- Google Custom Search API: 무료 계정 하루 100쿼리
+- OpenAI API: 사용량에 따른 과금
+- 주가 데이터: 현재 더미 데이터 사용 (실제 API 연동 가능)
 
-## 커스터마이징
+## 🔒 보안 주의사항
 
-### Google 검색 도구 수정
+- **절대로** `.env` 파일을 Git에 커밋하지 마세요
+- API 키는 환경 변수로만 관리하세요
+- 프로덕션 환경에서는 API 키 제한 설정을 권장합니다
 
-`tools/googleSearchTool.ts` 파일을 수정하여 검색 기능을 커스터마이징할 수 있습니다:
+## 📝 라이센스
 
-- 검색 결과 수 조정
-- 결과 요약 방식 변경
-- 속도 제한 조정
+이 프로젝트는 MIT 라이센스 하에 배포됩니다.
 
-### OpenAI 통합 수정
+## 🤝 기여하기
 
-`openai_with_google_search.py` 파일에서 다음 항목을 조정할 수 있습니다:
+1. Fork 후 브랜치 생성
+2. 변경사항 커밋
+3. Pull Request 생성
 
-- 사용하는 OpenAI 모델 변경
-- 시스템 프롬프트 수정
-- 결과 표시 형식 변경
+## 📞 문의사항
 
-## 도커 배포
-
-프로젝트 루트 디렉토리에 포함된 Dockerfile을 사용하여 MCP 서버를 컨테이너화할 수 있습니다:
-
-```bash
-docker build -t google-search-mcp .
-docker run -p 3000:3000 -e GOOGLE_API_KEY=your-key -e GOOGLE_CSE_ID=your-id -e OPENAI_API_KEY=your-key google-search-mcp
-```
+이슈가 있으시면 GitHub Issues를 이용해 주세요.

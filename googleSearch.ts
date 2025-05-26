@@ -1,7 +1,9 @@
 import express, { Request, Response, Router, RequestHandler } from "express";
 import cors from "cors";
 import { GoogleSearchTool } from "./tools/googleSearchTool";
+import { StockAnalysisTool } from "./tools/stockAnalysisTool";
 import dotenv from 'dotenv';
+import path from 'path';
 
 // .env 파일에서 환경 변수 로드
 dotenv.config();
@@ -17,7 +19,7 @@ interface OpenAIFunctionDefinition {
 }
 
 // MCP 서버 설정
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3030;
 
 // Express 앱 생성
 const app = express();
@@ -28,7 +30,14 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({limit: '10mb'}));
-app.use(express.static(__dirname)); // 정적 파일 제공
+
+// 정적 파일 제공 - public 폴더를 올바르게 참조
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 루트 경로에서 index.html 제공
+app.get('/', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // 라우터 생성
 const router = Router();
@@ -36,10 +45,13 @@ const router = Router();
 // Google 검색 도구 인스턴스 생성
 const searchTool = new GoogleSearchTool();
 
+// 주식 분석 도구 인스턴스 생성
+const stockTool = new StockAnalysisTool();
+
 // 도구 목록 조회 엔드포인트
 const getToolsHandler: RequestHandler = (_req: Request, res: Response) => {
     // OpenAI Function Calling 형식으로 도구 정의 변환
-    const openAIToolDefinition: OpenAIFunctionDefinition = {
+    const searchToolDefinition: OpenAIFunctionDefinition = {
         type: "function",
         function: {
             name: searchTool.name,
@@ -61,13 +73,46 @@ const getToolsHandler: RequestHandler = (_req: Request, res: Response) => {
         }
     };
 
+    const stockToolDefinition: OpenAIFunctionDefinition = {
+        type: "function",
+        function: {
+            name: stockTool.name,
+            description: stockTool.description,
+            parameters: {
+                type: "object",
+                properties: {
+                    symbol: {
+                        type: "string",
+                        description: "주식 종목명 또는 종목코드"
+                    },
+                    startDate: {
+                        type: "string",
+                        description: "시작 날짜 (YYYY-MM-DD 형식)"
+                    },
+                    endDate: {
+                        type: "string",
+                        description: "종료 날짜 (YYYY-MM-DD 형식)"
+                    }
+                },
+                required: ["symbol", "startDate", "endDate"]
+            }
+        }
+    };
+
     res.json({
-        tools: [{
-            name: searchTool.name,
-            description: searchTool.description,
-            inputSchema: searchTool.inputSchema
-        }],
-        openai_tools: [openAIToolDefinition]  // OpenAI 형식의 도구 정의 추가
+        tools: [
+            {
+                name: searchTool.name,
+                description: searchTool.description,
+                inputSchema: searchTool.inputSchema
+            },
+            {
+                name: stockTool.name,
+                description: stockTool.description,
+                inputSchema: stockTool.inputSchema
+            }
+        ],
+        openai_tools: [searchToolDefinition, stockToolDefinition]  // OpenAI 형식의 도구 정의 추가
     });
 };
 
@@ -77,27 +122,43 @@ const callToolHandler: RequestHandler = async (req: Request, res: Response) => {
         const { name, arguments: args } = req.body;
         console.log(`도구 호출: ${name}`, args);
 
-        if (name !== searchTool.name) {
+        let result;
+        
+        if (name === searchTool.name) {
+            console.log('검색 도구 실행 시작...');
+            result = await searchTool.execute(args);
+        } else if (name === stockTool.name) {
+            console.log('주식 분석 도구 실행 시작...');
+            result = await stockTool.execute(args);
+        } else {
             console.log(`알 수 없는 도구 요청: ${name}`);
             res.status(400).json({
                 content: [{ type: "text", text: `Unknown tool: ${name}` }],
                 isError: true
             });
-            return; // void 반환
+            return;
         }
 
-        console.log('검색 도구 실행 시작...');
-        const result = await searchTool.execute(args);
-        console.log('검색 결과 받음:', typeof result);
+        console.log('도구 실행 결과 받음:', typeof result);
         
         if (typeof result === "string") {
             res.json({
                 content: [{ type: "text", text: result }],
                 isError: false
             });
-            return; // void 반환
+            return;
         }
 
+        // 주식 분석 결과 처리
+        if (name === stockTool.name) {
+            res.json({
+                content: [{ type: "text", text: JSON.stringify(result) }],
+                isError: false
+            });
+            return;
+        }
+
+        // 검색 결과 처리
         res.json({
             content: [
                 { type: "text", text: result.summary },
@@ -105,11 +166,9 @@ const callToolHandler: RequestHandler = async (req: Request, res: Response) => {
             ],
             isError: false
         });
-        // return 문 제거
 
     } catch (error) {
         console.error("도구 실행 오류:", error);
-        // 오류 상세 정보 출력
         if (error instanceof Error) {
             console.error("오류 이름:", error.name);
             console.error("오류 메시지:", error.message);
@@ -119,12 +178,11 @@ const callToolHandler: RequestHandler = async (req: Request, res: Response) => {
             content: [{ type: "text", text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
             isError: true
         });
-        // return 문 제거
     }
 };
 
 // 라우터에 핸들러 등록
-router.get("/", (_req: Request, res: Response) => {
+router.get("/api", (_req: Request, res: Response) => {
     res.json({
         name: "Google Search MCP Server",
         version: "1.0.0",
@@ -266,10 +324,11 @@ router.post("/openai/run", async (req: Request, res: Response) => {
     }
 });
 
-// 라우터를 앱에 마운트
+// 라우터를 앱에 마운트 - API 경로에만 적용
 app.use("/", router);
 
 // 서버 시작
 app.listen(PORT, () => {
     console.log(`MCP Server running on http://localhost:${PORT}`);
+    console.log(`Web interface available at http://localhost:${PORT}`);
 });

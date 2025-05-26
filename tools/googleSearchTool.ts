@@ -137,8 +137,20 @@ export class GoogleSearchTool implements Tool {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Google API 오류 데이터:', errorText);
-                throw new Error(`Google API error: ${response.status} ${response.statusText}`);
+                console.error('Google API 오류 상세:');
+                console.error('- 상태 코드:', response.status);
+                console.error('- 상태 텍스트:', response.statusText);
+                console.error('- 응답 본문:', errorText);
+                
+                // JSON 파싱 시도
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    console.error('- 파싱된 오류:', JSON.stringify(errorJson, null, 2));
+                } catch (parseError) {
+                    console.error('- JSON 파싱 실패:', parseError);
+                }
+                
+                throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorText}`);
             }
 
             // 응답 파싱
