@@ -26,10 +26,10 @@ interface SearchResultWithSummary {
 
 export class GoogleSearchTool implements Tool {
     name = "google_web_search";
-    description = "Google Custom Search API를 사용하여 웹 검색을 수행합니다. " +
+    description = "Google Custom Search API를 사용하여 웹 검색을 수행하고 결과를 요약합니다. " +
         "일반적인 정보 검색, 뉴스, 기사 및 온라인 컨텐츠 탐색에 이상적입니다. " +
         "최신 정보가 필요하거나 다양한 웹 소스가 필요할 때 사용하세요. " +
-        "요청당 최대 10개의 결과를 반환합니다.";
+        "검색 결과는 5개까지 제공되며, AI가 요약 및 설명을 제공합니다.";
     inputSchema = {
         type: "object",
         properties: {
@@ -39,8 +39,13 @@ export class GoogleSearchTool implements Tool {
             },
             num: {
                 type: "number",
-                description: "결과 수 (1-10, 기본값 5)",
+                description: "결과 수 (고정값 5)",
                 default: 5
+            },
+            isSummary: {
+                type: "boolean",
+                description: "용어 요약 요청 여부",
+                default: false
             }
         },
         required: ["query"],
@@ -102,12 +107,12 @@ export class GoogleSearchTool implements Tool {
         this.requestCount.day++;
     }
 
-    async execute(args: { query: string; num?: number }): Promise<SearchResultWithSummary | string> {
+    async execute(args: { query: string; num?: number; isSummary?: boolean }): Promise<SearchResultWithSummary | string> {
         try {
             console.log('검색 시작:', args);
             this.checkRateLimit();
             
-            const { query, num = 5 } = args;
+            const { query, num = 5, isSummary = false } = args;
             
             // 환경 변수 확인
             console.log('Google API 키 설정 상태:', this.GOOGLE_API_KEY ? '값 있음' : '값 없음');
@@ -125,8 +130,8 @@ export class GoogleSearchTool implements Tool {
         url.searchParams.set('cx', this.GOOGLE_CSE_ID);
             url.searchParams.set('key', this.GOOGLE_API_KEY);
             
-            // 다른 필수가 아닌 옵션들은 설정하지 않음
-            // url.searchParams.set('num', Math.min(num, 10).toString());
+            // 결과 수를 5개로 고정
+            url.searchParams.set('num', '5');
             
     console.log('검색 URL 생성:', url.toString().replace(this.GOOGLE_API_KEY, '[API_KEY]'));
 
@@ -173,21 +178,29 @@ export class GoogleSearchTool implements Tool {
             
             console.log('OpenAI로 결과 요약 시작...');
 
-        // OpenAI를 사용하여 검색 결과 요약
+        // OpenAI를 사용하여 검색 결과 요약 및 설명
+    const systemPrompt = isSummary ? 
+        "당신은 전문적인 지식을 가진 AI 어시스턴트입니다. 사용자가 요청한 용어나 개념에 대해 친절하고 상세하게 설명해주세요. 검색 결과를 바탕으로 정확한 정보를 제공하되, 이해하기 쉽게 설명해주세요." :
+        "당신은 유용한 AI 어시스턴트입니다. 검색 결과를 바탕으로 사용자의 질문에 대해 정확하고 도움이 되는 답변을 제공해주세요. 필요한 경우 추가 설명이나 맥락을 제공하여 사용자가 더 잘 이해할 수 있도록 도와주세요.";
+
+    const userPrompt = isSummary ?
+        `사용자가 '${query}'에 대해 알고 싶어합니다. 다음 검색 결과를 바탕으로 이 용어/개념을 상세하고 이해하기 쉽게 설명해주세요:\n\n${results.join('\n\n')}` :
+        `사용자의 질문: '${query}'\n\n다음은 관련 검색 결과입니다:\n\n${results.join('\n\n')}\n\n이 정보를 바탕으로 사용자의 질문에 대해 유용하고 정확한 답변을 제공해주세요.`;
+
     const summary = await this.openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o",
             messages: [
                 {
                     role: "system",
-                content: "검색 결과를 간단히 요약해주세요."
+                content: systemPrompt
             },
                 {
                 role: "user",
-       content: `다음은 "${query}"에 대한 검색 결과입니다:\n\n${results.join('\n\n')}`
+       content: userPrompt
             }
         ],
         temperature: 0.7,
-            max_tokens: 150
+            max_tokens: 500
     });
 
     return {

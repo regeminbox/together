@@ -48,6 +48,32 @@ const searchTool = new GoogleSearchTool();
 // 주식 분석 도구 인스턴스 생성
 const stockTool = new StockAnalysisTool();
 
+// 용어 요약 엔드포인트 추가
+const termSummaryHandler: RequestHandler = async (req: Request, res: Response) => {
+    try {
+        const { query } = req.body;
+        if (!query) {
+            res.status(400).json({ error: "Query is required" });
+            return;
+        }
+
+        const result = await searchTool.execute({
+            query,
+            num: 5,
+            isSummary: true
+        });
+
+        if (typeof result === "string") {
+            res.json({ summary: result });
+        } else {
+            res.json({ summary: result.summary });
+        }
+    } catch (error) {
+        console.error("Term summary error:", error);
+        res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+    }
+};
+
 // 도구 목록 조회 엔드포인트
 const getToolsHandler: RequestHandler = (_req: Request, res: Response) => {
     // OpenAI Function Calling 형식으로 도구 정의 변환
@@ -191,7 +217,8 @@ router.get("/api", (_req: Request, res: Response) => {
             { method: "POST", path: "/tools/call", description: "도구 실행 (MCP 형식)" },
             { method: "POST", path: "/openai/tools", description: "OpenAI Function Calling 형식의 도구 정의 조회" },
             { method: "POST", path: "/openai/run", description: "OpenAI Function Calling 형식으로 도구 실행" },
-            { method: "GET", path: "/api-test", description: "API 키와 CSE ID 테스트" }
+            { method: "GET", path: "/api-test", description: "API 키와 CSE ID 테스트" },
+            { method: "POST", path: "/term-summary", description: "용어 요약 및 설명" }
         ]
     });
 });
@@ -268,6 +295,7 @@ router.get("/test-api", (req: Request, res: Response) => {
     });
 });
 router.post("/tools/call", callToolHandler);
+router.post("/term-summary", termSummaryHandler);
 
 // OpenAI Function Calling 형식에 맞춘 엔드포인트 추가
 router.post("/openai/tools", (_req: Request, res: Response) => {

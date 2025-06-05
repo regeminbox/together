@@ -106,39 +106,71 @@ export class StockAnalysisTool implements Tool {
     }
 
     /**
-     * Google 뉴스 검색
+     * 다각도 뉴스 검색 - 개선된 버전
      */
     private async searchNews(symbol: string, startDate: string, endDate: string): Promise<NewsItem[]> {
         try {
-            const query = `${symbol} 주가 뉴스 ${startDate} ${endDate}`;
-            const url = new URL('https://www.googleapis.com/customsearch/v1');
-            url.searchParams.set('q', query);
-            url.searchParams.set('cx', this.GOOGLE_CSE_ID);
-            url.searchParams.set('key', this.GOOGLE_API_KEY);
-            url.searchParams.set('num', '5');
-
-            console.log('뉴스 검색 URL:', url.toString().replace(this.GOOGLE_API_KEY, '[API_KEY]'));
-
-            const response = await fetch(url.toString());
+            // 기본 검색 + 종목별 맞춤 검색
+            const baseQuery = `${symbol} 주가 뉴스 ${startDate} ${endDate}`;
+            const queries = [baseQuery];
             
-            if (!response.ok) {
-                console.error('뉴스 검색 API 오류:', response.status, response.statusText);
-                return [];
+            // 종목별 특화 쿼리 추가
+            const cleanSymbol = symbol.replace(/\.(KS|KQ|NYSE|NASDAQ)$/i, '');
+            if (cleanSymbol.toLowerCase().includes('nvda') || cleanSymbol.toLowerCase().includes('nvidia')) {
+                queries.push(
+                    `NVIDIA AI chip ${startDate}`,
+                    `엔비디아 사우디 계약 ${startDate}`,
+                    `NVIDIA 블랙웰 ${startDate}`
+                );
+            } else if (cleanSymbol.includes('삼성전자')) {
+                queries.push(
+                    `삼성전자 반도체 ${startDate}`,
+                    `삼성 HBM 메모리 ${startDate}`
+                );
+            }
+            
+            const allNews: NewsItem[] = [];
+            const seenUrls = new Set<string>();
+
+            console.log(`다각도 뉴스 검색: ${queries.length}개 쿼리`);
+
+            for (const query of queries.slice(0, 5)) { // 최대 5개 쿼리
+                try {
+                    const url = new URL('https://www.googleapis.com/customsearch/v1');
+                    url.searchParams.set('q', query);
+                    url.searchParams.set('cx', this.GOOGLE_CSE_ID);
+                    url.searchParams.set('key', this.GOOGLE_API_KEY);
+                    url.searchParams.set('num', '5');
+                    
+                    const response = await fetch(url.toString());
+                    
+                    if (!response.ok) continue;
+                    
+                    const data = await response.json() as any;
+                    
+                    if (data.items) {
+                        for (const item of data.items) {
+                            if (!seenUrls.has(item.link)) {
+                                seenUrls.add(item.link);
+                                allNews.push({
+                                    title: item.title || '',
+                                    description: item.snippet || '',
+                                    url: item.link || '',
+                                    date: startDate
+                                });
+                            }
+                        }
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                } catch (error) {
+                    console.error(`쿼리 "${query}" 실패:`, error);
+                    continue;
+                }
             }
 
-            const data = await response.json() as any;
-            
-            if (!data.items) {
-                console.log('뉴스 검색 결과 없음');
-                return [];
-            }
-
-            return data.items.map((item: any) => ({
-                title: item.title || '',
-                description: item.snippet || '',
-                url: item.link || '',
-                date: startDate // 임시로 시작 날짜 사용
-            }));
+            console.log(`총 ${allNews.length}개 뉴스 발견`);
+            return allNews.slice(0, 10); // 상위 10개 반환
 
         } catch (error) {
             console.error('뉴스 검색 오류:', error);
@@ -182,47 +214,60 @@ export class StockAnalysisTool implements Tool {
             const minPrice = Math.min(...priceArray);
             const volatility = ((maxPrice - minPrice) / minPrice * 100).toFixed(2);
 
-            const prompt = `주식 분석 요청:
+            const prompt = `전문 주식 분석 요청:
+
+📊 **기본 정보**
 종목: ${symbol} (${market === 'KR' ? '한국' : '미국'} 시장)
 기간: ${stockData[0]?.date} ~ ${stockData[stockData.length - 1]?.date}
 
-주가 데이터:
+📈 **주가 데이터**
 ${stockDataText}
 
-주요 지표:
+📉 **주요 지표**
 - 가격 변동: ${priceChange > 0 ? '+' : ''}${this.formatPrice(Math.abs(priceChange), isKoreanStock)} (${percentChange}%)
 - 최고가: ${this.formatPrice(maxPrice, isKoreanStock)}
 - 최저가: ${this.formatPrice(minPrice, isKoreanStock)}
 - 변동성: ${volatility}%
 - 평균 거래량: ${avgVolume.toLocaleString()}
 
-관련 뉴스:
+📰 **관련 뉴스**
 ${newsText}
 
-위 정보를 바탕으로 다음을 분석해주세요:
-1. 주가 변동의 주요 원인 분석
-2. 기술적 분석 (지지선, 저항선, 트렌드 등)
-3. 거래량 분석 및 의미
-4. 관련 뉴스와 주가 움직임의 상관관계
-5. 위험 요인 및 기회 요인
-6. 단기 투자 전망 (1-2주)
+**분석 요청:**
+1. **핵심 원인 분석** - 주가 변동의 가장 직접적인 원인 1-2가지 명확히 식별
+2. **뉴스-주가 상관관계** - 뉴스 발표와 주가 움직임의 시간적 연관성
+3. **기술적 분석** - 거래량, 트렌드, 지지/저항선
+4. **위험도 평가** - 단기 위험 요인 및 기회 요인
+5. **단기 전망** - 1-2주 내 주가 전망 (정보 제공 목적)
 
-한국어로 상세하고 전문적으로 분석해주세요. 투자 권유가 아닌 정보 제공 목적임을 명시하고, 분석 결과는 명확하고 구체적으로 작성해주세요.`;
+**기준:** 구체적 수치와 사실에 기반, 투자 권유 아닌 정보 제공, 핵심 포인트는 **굵은 글씨**로 강조`;
 
             const response = await this.openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4o",
                 messages: [
                     {
                         role: "system",
-                        content: "당신은 전문 주식 애널리스트입니다. 주가 데이터와 뉴스를 종합하여 객관적이고 상세한 분석을 제공합니다. 투자 권유가 아닌 정보 제공 목적임을 항상 명시하세요."
+                        content: `당신은 15년 경력의 전문 주식 애널리스트입니다.
+
+**전문 영역:**
+- 뉴스와 시장 이벤트의 주가 영향 분석 전문가
+- 펀더멘털 및 기술적 분석 모두 능숙
+- 글로벌 시장 동향과 업계별 특성 전문 지식
+
+**분석 원칙:**
+1. 객관적 데이터와 구체적 사실에 기반
+2. 명확한 근거와 논리적 인과관계 제시
+3. 투자 권유가 아닌 정보 제공 목적
+4. 불확실성과 위험 요소 명시
+5. 핵심 포인트를 굵은 글씨로 강조하여 가독성 제고`
                     },
                     {
                         role: "user",
                         content: prompt
                     }
                 ],
-                temperature: 0.7,
-                max_tokens: 1200
+                temperature: 0.3, // 더 일관되고 객관적인 분석
+                max_tokens: 1500 // 더 상세한 분석을 위해 증가
             });
 
             return response.choices[0].message.content || "분석을 완료할 수 없습니다.";
