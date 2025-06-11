@@ -56,6 +56,60 @@ function switchTab(tabName) {
 function quickSearch(query) {
     document.getElementById('search-query').value = query;
     performSearch();
+    const container = document.getElementById("search-tab");
+    container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+    });
+}
+
+// ===== 추가 버튼 생성 ====
+function toggleMore() {
+      const termSection = document.getElementById('termStages');
+      const button = document.getElementById('show-more-btn');
+      if (termSection.style.display === 'none' || termSection.style.display === '') {
+        termSection.style.display = 'flex';
+        button.textContent = '접기';
+      } else {
+        termSection.style.display = 'none';
+        button.textContent = '단계별 더 보기';
+      }
+}
+
+function toggleBeginnerTerms() {
+    const section = document.getElementById('beginner-terms');
+    const button = document.getElementById('beginner-toggle');
+    if (section.style.display === 'none' || section.style.display === '') {
+      section.style.display = 'block';
+      button.textContent = '▲';
+    } else {
+      section.style.display = 'none';
+      button.textContent = '▼';
+    }
+}
+
+function toggleIntermediateTerms() {
+    const section = document.getElementById('intermediate-terms');
+    const button = document.getElementById('intermediate-toggle');
+    if (section.style.display === 'none' || section.style.display === '') {
+      section.style.display = 'block';
+      button.textContent = '▲';
+    } else {
+      section.style.display = 'none';
+      button.textContent = '▼';
+    }
+}
+
+function toggleAdvancedTerms() {
+    const section = document.getElementById('advanced-terms');
+    const button = document.getElementById('advanced-toggle');
+    if (section.style.display === 'none' || section.style.display === '') {
+      section.style.display = 'block';
+      button.textContent = '▲';
+    } else {
+      section.style.display = 'none';
+      button.textContent = '▼';
+    }
 }
 
 // ===== 빠른 주식 선택 =====
