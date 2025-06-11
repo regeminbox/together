@@ -384,3 +384,42 @@ function drawStockChart(chartData, market) {
         }
     });
 }
+
+// ==== 뉴스 요약 기능 ====
+async function analyzeNews() {
+    const input = document.getElementById('news-input').value.trim();
+    const resultContainer = document.getElementById('news-result-container');
+    const resultDiv = document.getElementById('news-result');
+    const loadingDiv = document.getElementById('news-loading');
+
+    if (!input) {
+        alert('뉴스 내용을 입력해주세요.');
+        return;
+    }
+
+    resultContainer.style.display = 'none';
+    loadingDiv.classList.add('active');
+
+    try {
+        const response = await fetch('/tools/call', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: 'news_summarizer',  // ← 백엔드 함수 이름
+                arguments: { content: input }
+            })
+        });
+
+        if (!response.ok) throw new Error(`요청 오류: ${response.status}`);
+
+        const data = await response.json();
+        resultDiv.innerHTML = data.content[0].text.replace(/\n/g, "<br>");
+        resultContainer.style.display = 'block';
+    } catch (error) {
+        console.error('뉴스 분석 오류:', error);
+        resultDiv.innerHTML = `<div class="error">오류: ${error.message}</div>`;
+        resultContainer.style.display = 'block';
+    } finally {
+        loadingDiv.classList.remove('active');
+    }
+}

@@ -33,7 +33,13 @@
                     </svg>
                     <span>주식 분석</span>
                 </button>
-
+                <button class="nav-item" onclick="switchTab('news')" data-tab="news">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-newspaper-icon lucide-newspaper">
+                        <path d="M15 18h-5"/><path d="M18 14h-8"/>
+                        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>
+                    </svg>
+                    <span>뉴스 분석</span>
+                </button>
             </nav>
         </div>
         
@@ -265,7 +271,28 @@
                 </div>
             </div>
             
+            <!-- News Tab -->
+            <div id="news-tab" class="tab-content">
+                <div class="content-header">
+                    <h1>뉴스 요약</h1>
+                    <p>읽기 힘든 최신 뉴스를 AI가 요약해드립니다.</p>
+                </div>
+                <div class="chat-container">
+                    <div class="input-container">
+                        <textarea id="news-input" class="chat-input" placeholder="뉴스 기사를 붙여넣으세요..." rows="6" style="flex: 1;"></textarea>
+                        <button class="send-btn" onclick="analyzeNews()">요약</button>
+                    </div>
 
+                    <div class="loading" id="news-loading">
+                        <div class="loading-spinner"></div>
+                        <span>뉴스를 분석 중입니다...</span>
+                    </div>
+
+                    <div class="result-container" id="news-result-container">
+                        <div class="ai-message" id="news-result"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     

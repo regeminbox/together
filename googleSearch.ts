@@ -2,6 +2,7 @@ import express, { Request, Response, Router, RequestHandler } from "express";
 import cors from "cors";
 import { GoogleSearchTool } from "./tools/googleSearchTool";
 import { StockAnalysisTool } from "./tools/stockAnalysisTool";
+import { NewsSummarizerTool } from './tools/newsSummarizerTool';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -47,6 +48,9 @@ const searchTool = new GoogleSearchTool();
 
 // 주식 분석 도구 인스턴스 생성
 const stockTool = new StockAnalysisTool();
+
+// 뉴스 요약약 도구 인스턴스 생성
+const newsTool = new NewsSummarizerTool();
 
 // 용어 요약 엔드포인트 추가
 const termSummaryHandler: RequestHandler = async (req: Request, res: Response) => {
@@ -125,6 +129,24 @@ const getToolsHandler: RequestHandler = (_req: Request, res: Response) => {
         }
     };
 
+    const newsToolDefinition: OpenAIFunctionDefinition = {
+        type: "function",
+        function: {
+            name: newsTool.name,
+            description: newsTool.description,
+            parameters: {
+                type: "object",
+                properties: {
+                    content: {
+                        type: "string",
+                        description: "요약하고 싶은 뉴스 기사 본문"
+                    }
+                },
+                required: ["content"]
+            }
+        }
+    }
+
     res.json({
         tools: [
             {
@@ -136,9 +158,14 @@ const getToolsHandler: RequestHandler = (_req: Request, res: Response) => {
                 name: stockTool.name,
                 description: stockTool.description,
                 inputSchema: stockTool.inputSchema
+            },
+            {
+                name: newsTool.name,
+                description: newsTool.description,
+                inputSchema: newsTool.inputSchema
             }
         ],
-        openai_tools: [searchToolDefinition, stockToolDefinition]  // OpenAI 형식의 도구 정의 추가
+        openai_tools: [searchToolDefinition, stockToolDefinition, newsToolDefinition]  // OpenAI 형식의 도구 정의 추가
     });
 };
 
@@ -156,7 +183,11 @@ const callToolHandler: RequestHandler = async (req: Request, res: Response) => {
         } else if (name === stockTool.name) {
             console.log('주식 분석 도구 실행 시작...');
             result = await stockTool.execute(args);
-        } else {
+        } else if (name === newsTool.name) {              
+            console.log('뉴스 요약 도구 실행 시작...');
+            result = await newsTool.execute(args);
+        }
+        else {
             console.log(`알 수 없는 도구 요청: ${name}`);
             res.status(400).json({
                 content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -179,6 +210,19 @@ const callToolHandler: RequestHandler = async (req: Request, res: Response) => {
         if (name === stockTool.name) {
             res.json({
                 content: [{ type: "text", text: JSON.stringify(result) }],
+                isError: false
+            });
+            return;
+        }
+
+        // 뉴스 요약 결과 
+        if (name === newsTool.name) {
+            const { summary, terms, key } = result;
+            res.json({
+                content: [{
+                    type: "text",
+                    text: result.summary
+                }],
                 isError: false
             });
             return;
