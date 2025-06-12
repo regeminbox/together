@@ -1,302 +1,820 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Assistant - 검색 & 주식 분석</title>
-    
+
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
     <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Together</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchTab('search')" data-tab="search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    <span>용어검색</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('stock')" data-tab="stock">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="2" x2="12" y2="22"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
-                    <span>주식 분석</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('news')" data-tab="news">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-newspaper-icon lucide-newspaper">
-                        <path d="M15 18h-5"/><path d="M18 14h-8"/>
-                        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>
-                    </svg>
-                    <span>뉴스 분석</span>
-                </button>
-            </nav>
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>Together</h2>
         </div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Search Tab -->
-            <div id="search-tab" class="tab-content active">
-                <div class="content-header">
-                    <h1>용어 검색</h1>
-                    <p>무엇이든 물어보세요. AI가 답변해드립니다.</p>
-                </div>
-                
-                <div class="chat-container">
-                    <div class="input-container">
-                        <input type="text" id="search-query" placeholder="검색하고 싶은 내용을 입력하세요..." class="chat-input">
-                        <button class="send-btn" onclick="performSearch()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <div class="suggestions">
-                        <span class="suggestion-chip" onclick="quickSearch('주식이 무엇인가요?')">주식</span>
-                        <span class="suggestion-chip" onclick="quickSearch('매수란 무엇인가요?')">매수</span>
-                        <span class="suggestion-chip" onclick="quickSearch('배당금이란 무엇인가요?')">배당금</span>
-                        <span class="suggestion-chip" onclick="quickSearch('PER 지표는 어떻게 해석하나요?')">PER</span>
-                        <button class="toggle-arrow-btn" id="show-more-btn" onclick="toggleMore()">단계별 더 보기</button>
-                    </div>
+        <nav class="sidebar-nav">
+          <button
+            class="nav-item active"
+            onclick="switchTab('search')"
+            data-tab="search"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <span>용어검색</span>
+          </button>
+          <button
+            class="nav-item"
+            onclick="switchTab('stock')"
+            data-tab="stock"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="12" y1="2" x2="12" y2="22"></line>
+              <path
+                d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+              ></path>
+            </svg>
+            <span>주식 분석</span>
+          </button>
+          <button class="nav-item" onclick="switchTab('news')" data-tab="news">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-newspaper-icon lucide-newspaper"
+            >
+              <path d="M15 18h-5" />
+              <path d="M18 14h-8" />
+              <path
+                d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"
+              />
+              <rect width="8" height="4" x="10" y="6" rx="1" />
+            </svg>
+            <span>뉴스 분석</span>
+          </button>
+        </nav>
+      </div>
 
-                    <div class="stage-terms" id="termStages">
-                        <div class="stage">
-                            <div class="stage">
-                                <div class="stage-title">🟢 초급 단계 (기초 용어 중심)
-                                    <button onclick="toggleBeginnerTerms()" class="toggle-arrow-btn" id="beginner-toggle" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">▼</button>
-                                </div>
-                                <div id="beginner-terms" style="display: none;">
-                                    <div class="stage-title">▪ 초급 1단계 – 주식의 개념과 기초 용어</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('주식이 무엇인가요?')">주식</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('주가는 무엇을 의미하나요?')">주가</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('증권사는 어떤 역할을 하나요?')">증권사</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('매수는 무슨 뜻인가요?')">매수</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('매도는 무슨 뜻인가요?')">매도</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('시가는 어떻게 정해지나요?')">시가</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('종가는 무엇인가요?')">종가</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('체결이란 무엇인가요?')">체결</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('주식 수수료는 어떻게 되나요?')">수수료</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('MTS는 무엇인가요?')">MTS</span>
-                                    </div>
-                                    <div class="stage-title">▪ 초보 2단계 – 거래 방식 및 시장 구조</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('코스피와 코스닥의 차이는 무엇인가요?')">코스피/코스닥</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('상장은 어떻게 이루어지나요?')">상장</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('시가총액이란 무엇인가요?')">시가총액</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('호가란 무엇인가요?')">호가</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('스프레드는 어떤 의미인가요?')">스프레드</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('거래량은 어떤 정보를 주나요?')">거래량</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('상한가란 무엇인가요?')">상한가</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('보통주와 우선주의 차이는?')">보통주</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('ETF란 무엇인가요?')">ETF</span>
-                                    </div>
-                                    <div class="stage-title">▪ 초급 3단계 – 수익 구조와 배당 개념</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('배당금은 어떻게 받나요?')">배당금</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('배당률이란 무엇인가요?')">배당률</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('유상증자는 무엇인가요?')">유상증자</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('무상증자는 무엇인가요?')">무상증자</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('공모주 청약이란 무엇인가요?')">공모주</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('청약은 어떻게 하나요?')">청약</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('주주총회는 무엇을 하나요?')">주주총회</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('IR은 무엇을 의미하나요?')">IR</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('분할매수란 무엇인가요?')">분할매수</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('평단가란 무엇인가요?')">평단가</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="stage">
-                                <div class="stage-title">🟡 중급 단계 (기본 분석 및 기술적 분석)
-                                    <button onclick="toggleIntermediateTerms()" class="toggle-arrow-btn" id="intermediate-toggle" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">▼</button>
-                                </div>
-                                <div id="intermediate-terms" style="display: none;">
-                                    <div class="stage-title">▪ 중급 1단계 – 기업 지표 및 재무 분석</div>
-                                        <div>
-                                            <span class="suggestion-chip" onclick="quickSearch('PER 지표는 무엇인가요?')">PER</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('PBR은 어떻게 계산하나요?')">PBR</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('EPS란 무엇인가요?')">EPS</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('BPS는 무엇을 뜻하나요?')">BPS</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('ROE가 높다는 건 어떤 의미인가요?')">ROE</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('ROA는 무엇인가요?')">ROA</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('부채비율은 얼마가 적정한가요?')">부채비율</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('유보율이란 무엇인가요?')">유보율</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('영업이익은 어떻게 구하나요?')">영업이익</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('이익잉여금의 의미는 무엇인가요?')">이익잉여금</span>
-                                        </div>
-                                        <div class="stage-title">▪ 중급 2단계 – 기술적 분석 기초</div>
-                                        <div>
-                                            <span class="suggestion-chip" onclick="quickSearch('캔들차트는 어떻게 읽나요?')">캔들차트</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('이동평균선은 무엇을 의미하나요?')">이동평균선</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('MACD는 어떤 신호를 주나요?')">MACD</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('RSI는 과매수를 알려주나요?')">RSI</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('볼린저밴드는 어떻게 활용하나요?')">볼린저밴드</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('지지선과 저항선은 어떻게 찾나요?')">지지선</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('골든크로스란 무엇인가요?')">골든크로스</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('추세선은 어떻게 그리나요?')">추세선</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('OBV 지표는 무엇인가요?')">OBV</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('패턴 분석은 어떤 종류가 있나요?')">패턴분석</span>
-                                        </div>
-                                        <div class="stage-title">▪ 중급 3단계 – 시장 전반 및 수급 이해</div>
-                                        <div>
-                                            <span class="suggestion-chip" onclick="quickSearch('공매도는 어떻게 작동하나요?')">공매도</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('기관 투자자는 누구인가요?')">기관</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('외국인 수급은 주가에 어떤 영향을 주나요?')">외국인</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('프로그램 매매란 무엇인가요?')">프로그램매매</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('선물 거래는 어떻게 하나요?')">선물</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('옵션 거래는 어떤 구조인가요?')">옵션</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('포지션을 잡는다는 건 무슨 의미인가요?')">포지션</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('FOMC는 무엇을 결정하나요?')">FOMC</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('환율이 주식에 미치는 영향은?')">환율</span>
-                                            <span class="suggestion-chip" onclick="quickSearch('시황이란 무엇인가요?')">시황</span>
-                                        </div>
-                                </div>
-                            </div>
-                            <div class="stage">
-                                <div class="stage-title">🔵 고급 단계 (전략, 시스템, 글로벌 개념)
-                                    <button onclick="toggleAdvancedTerms()" class="toggle-arrow-btn" id="advanced-toggle" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">▼</button>
-                                </div>
-                                <div id="advanced-terms" style="display: none;">
-                                    <div class="stage-title">▪ 고급 1단계 – 고급 투자 전략</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('퀀트 투자는 무엇인가요?')">퀀트투자</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('가치투자는 어떤 전략인가요?')">가치투자</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('성장투자는 어떻게 접근하나요?')">성장투자</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('리밸런싱이란 무엇인가요?')">리밸런싱</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('백테스트는 왜 중요한가요?')">백테스트</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('자산배분 전략이란 무엇인가요?')">자산배분</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('테마주는 어떤 주식인가요?')">테마주</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('ROIC 지표는 어떤 정보를 주나요?')">ROIC</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('DCF는 어떻게 계산하나요?')">DCF</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('탑다운 분석은 무엇인가요?')">탑다운분석</span>
-                                    </div>
-                                    <div class="stage-title">▪ 고급 2단계 – 해외 시장과 글로벌 흐름</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('S&P500 지수는 무엇인가요?')">S&P500</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('나스닥은 어떤 특징이 있나요?')">나스닥</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('FED의 역할은 무엇인가요?')">FED</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('CPI는 어떤 지표인가요?')">CPI</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('PPI는 무엇을 의미하나요?')">PPI</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('실업률이 시장에 미치는 영향은?')">실업률</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('국채금리는 왜 중요한가요?')">국채금리</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('달러인덱스는 무엇인가요?')">달러인덱스</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('리스크온/오프 전략이란?')">리스크온</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('글로벌 자금 흐름은 어떻게 확인하나요?')">글로벌자금</span>
-                                    </div>
-                                    <div class="stage-title">▪ 고급 3단계 – 실전 및 시스템 트레이딩</div>
-                                    <div>
-                                        <span class="suggestion-chip" onclick="quickSearch('자동매매는 어떻게 구성하나요?')">자동매매</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('API를 활용한 주식 분석 방법은?')">API</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('HFT는 무엇인가요?')">HFT</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('듀얼모멘텀 전략이란?')">듀얼모멘텀</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('레버리지는 어떤 방식으로 작동하나요?')">레버리지</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('스프레드 전략은 어떻게 구성하나요?')">스프레드전략</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('옵션 전략에는 어떤 것이 있나요?')">옵션전략</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('파생상품으로 헷지를 어떻게 하나요?')">파생헷지</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('샤프지수는 무엇을 의미하나요?')">샤프지수</span>
-                                        <span class="suggestion-chip" onclick="quickSearch('베타 값은 어떤 의미가 있나요?')">베타</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="loading" id="search-loading">
-                        <div class="loading-spinner"></div>
-                        <span>AI가 답변을 준비 중입니다...</span>
-                    </div>
-                    
-                    <div class="result-container" id="search-result-container">
-                        <div class="ai-message" id="search-result"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Stock Tab -->
-            <div id="stock-tab" class="tab-content">
-                <div class="content-header">
-                    <h1>주식 분석</h1>
-                    <p>AI가 주가 변동과 뉴스를 분석해드립니다.</p>
-                </div>
-                
-                <div class="analysis-container">
-                    <div class="analysis-form">
-                        <div class="form-group">
-                            <label>종목명</label>
-                            <input type="text" id="stock-symbol" placeholder="예: 삼성전자, AAPL" class="form-input">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>시작일</label>
-                                <input type="date" id="start-date" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label>종료일</label>
-                                <input type="date" id="end-date" class="form-input">
-                            </div>
-                        </div>
-                        <button class="analyze-btn" onclick="performStockAnalysis()">
-                            분석 시작
-                        </button>
-                    </div>
-                    
-                    <div class="quick-stocks">
-                        <button class="stock-chip" onclick="quickStock('삼성전자')">삼성전자</button>
-                        <button class="stock-chip" onclick="quickStock('SK하이닉스')">SK하이닉스</button>
-                        <button class="stock-chip" onclick="quickStock('AAPL')">Apple</button>
-                        <button class="stock-chip" onclick="quickStock('TSLA')">Tesla</button>
-                        <button class="stock-chip" onclick="quickStock('NVDA')">NVIDIA</button>
-                    </div>
-                    
-                    <div class="loading" id="stock-loading">
-                        <div class="loading-spinner"></div>
-                        <span>주식 데이터를 분석 중입니다...</span>
-                    </div>
-                    
-                    <div class="result-container" id="stock-result-container">
-                        <div id="stock-result"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- News Tab -->
-            <div id="news-tab" class="tab-content">
-                <div class="content-header">
-                    <h1>뉴스 요약</h1>
-                    <p>읽기 힘든 최신 뉴스를 AI가 요약해드립니다.</p>
-                </div>
-                <div class="chat-container">
-                    <div class="input-container">
-                        <textarea id="news-input" class="chat-input" placeholder="뉴스 기사를 붙여넣으세요..." rows="6" style="flex: 1;"></textarea>
-                        <button class="send-btn" onclick="analyzeNews()">요약</button>
-                    </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Search Tab -->
+        <div id="search-tab" class="tab-content active">
+          <div class="content-header">
+            <h1>용어 검색</h1>
+            <p>무엇이든 물어보세요. AI가 답변해드립니다.</p>
+          </div>
 
-                    <div class="loading" id="news-loading">
-                        <div class="loading-spinner"></div>
-                        <span>뉴스를 분석 중입니다...</span>
-                    </div>
-
-                    <div class="result-container" id="news-result-container">
-                        <div class="ai-message" id="news-result"></div>
-                    </div>
-                </div>
+          <div class="chat-container">
+            <div class="input-container">
+              <input
+                type="text"
+                id="search-query"
+                placeholder="검색하고 싶은 내용을 입력하세요..."
+                class="chat-input"
+              />
+              <button class="send-btn" onclick="performSearch()">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
             </div>
+
+            <div class="suggestions">
+              <span
+                class="suggestion-chip"
+                onclick="quickSearch('주식이 무엇인가요?')"
+                >주식</span
+              >
+              <span
+                class="suggestion-chip"
+                onclick="quickSearch('매수란 무엇인가요?')"
+                >매수</span
+              >
+              <span
+                class="suggestion-chip"
+                onclick="quickSearch('배당금이란 무엇인가요?')"
+                >배당금</span
+              >
+              <span
+                class="suggestion-chip"
+                onclick="quickSearch('PER 지표는 어떻게 해석하나요?')"
+                >PER</span
+              >
+              <button
+                class="toggle-arrow-btn"
+                id="show-more-btn"
+                onclick="toggleMore()"
+              >
+                단계별 더 보기
+              </button>
+            </div>
+
+            <div class="stage-terms" id="termStages">
+              <div class="stage">
+                <div class="stage">
+                  <div class="stage-title">
+                    🟢 초급 단계 (기초 용어 중심)
+                    <button
+                      onclick="toggleBeginnerTerms()"
+                      class="toggle-arrow-btn"
+                      id="beginner-toggle"
+                      style="
+                        margin-left: 10px;
+                        padding: 4px 8px;
+                        font-size: 12px;
+                      "
+                    >
+                      ▼
+                    </button>
+                  </div>
+                  <div id="beginner-terms" style="display: none">
+                    <div class="stage-title">
+                      ▪ 초급 1단계 – 주식의 개념과 기초 용어
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('주식이 무엇인가요?')"
+                        >주식</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('주가는 무엇을 의미하나요?')"
+                        >주가</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('증권사는 어떤 역할을 하나요?')"
+                        >증권사</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('매수는 무슨 뜻인가요?')"
+                        >매수</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('매도는 무슨 뜻인가요?')"
+                        >매도</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('시가는 어떻게 정해지나요?')"
+                        >시가</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('종가는 무엇인가요?')"
+                        >종가</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('체결이란 무엇인가요?')"
+                        >체결</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('주식 수수료는 어떻게 되나요?')"
+                        >수수료</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('MTS는 무엇인가요?')"
+                        >MTS</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 초보 2단계 – 거래 방식 및 시장 구조
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('코스피와 코스닥의 차이는 무엇인가요?')"
+                        >코스피/코스닥</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('상장은 어떻게 이루어지나요?')"
+                        >상장</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('시가총액이란 무엇인가요?')"
+                        >시가총액</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('호가란 무엇인가요?')"
+                        >호가</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('스프레드는 어떤 의미인가요?')"
+                        >스프레드</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('거래량은 어떤 정보를 주나요?')"
+                        >거래량</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('상한가란 무엇인가요?')"
+                        >상한가</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('보통주와 우선주의 차이는?')"
+                        >보통주</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('ETF란 무엇인가요?')"
+                        >ETF</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 초급 3단계 – 수익 구조와 배당 개념
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('배당금은 어떻게 받나요?')"
+                        >배당금</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('배당률이란 무엇인가요?')"
+                        >배당률</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('유상증자는 무엇인가요?')"
+                        >유상증자</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('무상증자는 무엇인가요?')"
+                        >무상증자</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('공모주 청약이란 무엇인가요?')"
+                        >공모주</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('청약은 어떻게 하나요?')"
+                        >청약</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('주주총회는 무엇을 하나요?')"
+                        >주주총회</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('IR은 무엇을 의미하나요?')"
+                        >IR</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('분할매수란 무엇인가요?')"
+                        >분할매수</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('평단가란 무엇인가요?')"
+                        >평단가</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="stage">
+                  <div class="stage-title">
+                    🟡 중급 단계 (기본 분석 및 기술적 분석)
+                    <button
+                      onclick="toggleIntermediateTerms()"
+                      class="toggle-arrow-btn"
+                      id="intermediate-toggle"
+                      style="
+                        margin-left: 10px;
+                        padding: 4px 8px;
+                        font-size: 12px;
+                      "
+                    >
+                      ▼
+                    </button>
+                  </div>
+                  <div id="intermediate-terms" style="display: none">
+                    <div class="stage-title">
+                      ▪ 중급 1단계 – 기업 지표 및 재무 분석
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('PER 지표는 무엇인가요?')"
+                        >PER</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('PBR은 어떻게 계산하나요?')"
+                        >PBR</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('EPS란 무엇인가요?')"
+                        >EPS</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('BPS는 무엇을 뜻하나요?')"
+                        >BPS</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('ROE가 높다는 건 어떤 의미인가요?')"
+                        >ROE</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('ROA는 무엇인가요?')"
+                        >ROA</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('부채비율은 얼마가 적정한가요?')"
+                        >부채비율</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('유보율이란 무엇인가요?')"
+                        >유보율</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('영업이익은 어떻게 구하나요?')"
+                        >영업이익</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('이익잉여금의 의미는 무엇인가요?')"
+                        >이익잉여금</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 중급 2단계 – 기술적 분석 기초
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('캔들차트는 어떻게 읽나요?')"
+                        >캔들차트</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('이동평균선은 무엇을 의미하나요?')"
+                        >이동평균선</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('MACD는 어떤 신호를 주나요?')"
+                        >MACD</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('RSI는 과매수를 알려주나요?')"
+                        >RSI</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('볼린저밴드는 어떻게 활용하나요?')"
+                        >볼린저밴드</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('지지선과 저항선은 어떻게 찾나요?')"
+                        >지지선</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('골든크로스란 무엇인가요?')"
+                        >골든크로스</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('추세선은 어떻게 그리나요?')"
+                        >추세선</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('OBV 지표는 무엇인가요?')"
+                        >OBV</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('패턴 분석은 어떤 종류가 있나요?')"
+                        >패턴분석</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 중급 3단계 – 시장 전반 및 수급 이해
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('공매도는 어떻게 작동하나요?')"
+                        >공매도</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('기관 투자자는 누구인가요?')"
+                        >기관</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('외국인 수급은 주가에 어떤 영향을 주나요?')"
+                        >외국인</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('프로그램 매매란 무엇인가요?')"
+                        >프로그램매매</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('선물 거래는 어떻게 하나요?')"
+                        >선물</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('옵션 거래는 어떤 구조인가요?')"
+                        >옵션</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('포지션을 잡는다는 건 무슨 의미인가요?')"
+                        >포지션</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('FOMC는 무엇을 결정하나요?')"
+                        >FOMC</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('환율이 주식에 미치는 영향은?')"
+                        >환율</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('시황이란 무엇인가요?')"
+                        >시황</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="stage">
+                  <div class="stage-title">
+                    🔵 고급 단계 (전략, 시스템, 글로벌 개념)
+                    <button
+                      onclick="toggleAdvancedTerms()"
+                      class="toggle-arrow-btn"
+                      id="advanced-toggle"
+                      style="
+                        margin-left: 10px;
+                        padding: 4px 8px;
+                        font-size: 12px;
+                      "
+                    >
+                      ▼
+                    </button>
+                  </div>
+                  <div id="advanced-terms" style="display: none">
+                    <div class="stage-title">▪ 고급 1단계 – 고급 투자 전략</div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('퀀트 투자는 무엇인가요?')"
+                        >퀀트투자</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('가치투자는 어떤 전략인가요?')"
+                        >가치투자</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('성장투자는 어떻게 접근하나요?')"
+                        >성장투자</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('리밸런싱이란 무엇인가요?')"
+                        >리밸런싱</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('백테스트는 왜 중요한가요?')"
+                        >백테스트</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('자산배분 전략이란 무엇인가요?')"
+                        >자산배분</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('테마주는 어떤 주식인가요?')"
+                        >테마주</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('ROIC 지표는 어떤 정보를 주나요?')"
+                        >ROIC</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('DCF는 어떻게 계산하나요?')"
+                        >DCF</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('탑다운 분석은 무엇인가요?')"
+                        >탑다운분석</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 고급 2단계 – 해외 시장과 글로벌 흐름
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('S&P500 지수는 무엇인가요?')"
+                        >S&P500</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('나스닥은 어떤 특징이 있나요?')"
+                        >나스닥</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('FED의 역할은 무엇인가요?')"
+                        >FED</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('CPI는 어떤 지표인가요?')"
+                        >CPI</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('PPI는 무엇을 의미하나요?')"
+                        >PPI</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('실업률이 시장에 미치는 영향은?')"
+                        >실업률</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('국채금리는 왜 중요한가요?')"
+                        >국채금리</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('달러인덱스는 무엇인가요?')"
+                        >달러인덱스</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('리스크온/오프 전략이란?')"
+                        >리스크온</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('글로벌 자금 흐름은 어떻게 확인하나요?')"
+                        >글로벌자금</span
+                      >
+                    </div>
+                    <div class="stage-title">
+                      ▪ 고급 3단계 – 실전 및 시스템 트레이딩
+                    </div>
+                    <div>
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('자동매매는 어떻게 구성하나요?')"
+                        >자동매매</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('API를 활용한 주식 분석 방법은?')"
+                        >API</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('HFT는 무엇인가요?')"
+                        >HFT</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('듀얼모멘텀 전략이란?')"
+                        >듀얼모멘텀</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('레버리지는 어떤 방식으로 작동하나요?')"
+                        >레버리지</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('스프레드 전략은 어떻게 구성하나요?')"
+                        >스프레드전략</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('옵션 전략에는 어떤 것이 있나요?')"
+                        >옵션전략</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('파생상품으로 헷지를 어떻게 하나요?')"
+                        >파생헷지</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('샤프지수는 무엇을 의미하나요?')"
+                        >샤프지수</span
+                      >
+                      <span
+                        class="suggestion-chip"
+                        onclick="quickSearch('베타 값은 어떤 의미가 있나요?')"
+                        >베타</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="loading" id="search-loading">
+              <div class="loading-spinner"></div>
+              <span>AI가 답변을 준비 중입니다...</span>
+            </div>
+
+            <div class="result-container" id="search-result-container">
+              <div class="ai-message" id="search-result"></div>
+            </div>
+          </div>
         </div>
+
+        <!-- Stock Tab -->
+        <div id="stock-tab" class="tab-content">
+          <div class="content-header">
+            <h1>주식 분석</h1>
+            <p>AI가 주가 변동과 뉴스를 분석해드립니다.</p>
+          </div>
+
+          <div class="analysis-container">
+            <div class="analysis-form">
+              <div class="form-group">
+                <label>종목명</label>
+                <input
+                  type="text"
+                  id="stock-symbol"
+                  placeholder="예: 삼성전자, AAPL"
+                  class="form-input"
+                />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>시작일</label>
+                  <input type="date" id="start-date" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label>종료일</label>
+                  <input type="date" id="end-date" class="form-input" />
+                </div>
+              </div>
+              <button class="analyze-btn" onclick="performStockAnalysis()">
+                분석 시작
+              </button>
+            </div>
+
+            <div class="quick-stocks">
+              <button class="stock-chip" onclick="quickStock('삼성전자')">
+                삼성전자
+              </button>
+              <button class="stock-chip" onclick="quickStock('SK하이닉스')">
+                SK하이닉스
+              </button>
+              <button class="stock-chip" onclick="quickStock('AAPL')">
+                Apple
+              </button>
+              <button class="stock-chip" onclick="quickStock('TSLA')">
+                Tesla
+              </button>
+              <button class="stock-chip" onclick="quickStock('NVDA')">
+                NVIDIA
+              </button>
+            </div>
+
+            <div class="loading" id="stock-loading">
+              <div class="loading-spinner"></div>
+              <span>주식 데이터를 분석 중입니다...</span>
+            </div>
+
+            <div class="result-container" id="stock-result-container">
+              <div id="stock-result"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Tab -->
+        <div id="news-tab" class="tab-content">
+          <div class="content-header">
+            <h1>뉴스 요약</h1>
+            <p>읽기 힘든 최신 뉴스를 AI가 요약해드립니다.</p>
+          </div>
+          <div class="chat-container">
+            <div class="input-container">
+              <textarea
+                id="news-input"
+                class="chat-input"
+                placeholder="뉴스 기사를 붙여넣으세요..."
+                rows="6"
+                style="flex: 1"
+              ></textarea>
+              <button class="send-btn" onclick="analyzeNews()">요약</button>
+            </div>
+
+            <div class="loading" id="news-loading">
+              <div class="loading-spinner"></div>
+              <span>뉴스를 분석 중입니다...</span>
+            </div>
+
+            <div class="result-container" id="news-result-container">
+              <div class="ai-message" id="news-result"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Custom JavaScript -->
     <script src="/js/app.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      const observer = new MutationObserver(() => {
+        const markdownDiv = document.querySelector(
+          ".analysis-section div[style]"
+        );
+        if (markdownDiv && !markdownDiv.dataset.parsed) {
+          const markdownText = markdownDiv.innerText;
+          markdownDiv.innerHTML = marked.parse(markdownText);
+          markdownDiv.dataset.parsed = "true";
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+  </body>
 </html>
