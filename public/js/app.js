@@ -158,8 +158,17 @@ async function performSearch() {
     const data = await response.json();
 
     if (data.content && data.content.length > 0) {
-      const summary = data.content[0].text;
-      resultDiv.innerHTML = summary.replace(/\n/g, "<br>");
+      const markdownRaw = data.content[0].text;
+      const htmlConverted = markdownRaw
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") // **굵게**
+        .replace(/\*(.+?)\*/g, "<em>$1</em>") // *기울임*
+        .replace(/_(.+?)_/g, "<em>$1</em>") // _기울임_
+        .replace(/~~(.+?)~~/g, "<del>$1</del>") // ~~취소선~~
+        .replace(/`([^`]+?)`/g, "<code>$1</code>") // `코드`
+        .replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>") // > 인용문
+        .replace(/\n/g, "<br>"); // 줄바꿈
+
+      resultDiv.innerHTML = htmlConverted;
     } else {
       resultDiv.innerHTML = "검색 결과가 없습니다.";
     }
@@ -438,7 +447,18 @@ async function analyzeNews() {
     if (!response.ok) throw new Error(`요청 오류: ${response.status}`);
 
     const data = await response.json();
-    resultDiv.innerHTML = data.content[0].text.replace(/\n/g, "<br>");
+    const markdownRaw = data.content[0].text;
+    const htmlConverted = markdownRaw
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") // **굵게**
+      .replace(/\*(.+?)\*/g, "<em>$1</em>") // *기울임*
+      .replace(/_(.+?)_/g, "<em>$1</em>") // _기울임_
+      .replace(/~~(.+?)~~/g, "<del>$1</del>") // ~~취소선~~
+      .replace(/`([^`]+?)`/g, "<code>$1</code>") // `코드`
+      .replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>") // > 인용문
+      .replace(/\n/g, "<br>"); // 줄바꿈
+
+    resultDiv.innerHTML = htmlConverted;
+
     resultContainer.style.display = "block";
   } catch (error) {
     console.error("뉴스 분석 오류:", error);
@@ -487,8 +507,17 @@ async function performCompanyAnalysis() {
 
     const data = await response.json();
     if (data.content && data.content.length > 0) {
-      const reportHtml = data.content[0].text.replace(/\n/g, "<br>");
-      resultDiv.innerHTML = reportHtml;
+      const markdownRaw = data.content[0].text;
+      const htmlConverted = markdownRaw
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") // **굵게**
+        .replace(/\*(.+?)\*/g, "<em>$1</em>") // *기울임*
+        .replace(/_(.+?)_/g, "<em>$1</em>") // _기울임_
+        .replace(/~~(.+?)~~/g, "<del>$1</del>") // ~~취소선~~
+        .replace(/`([^`]+?)`/g, "<code>$1</code>") // `코드`
+        .replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>") // > 인용문
+        .replace(/\n/g, "<br>"); // 줄바꿈
+
+      resultDiv.innerHTML = htmlConverted;
     } else {
       resultDiv.innerHTML = "분석 결과가 없습니다.";
     }
